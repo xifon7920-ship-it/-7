@@ -1,0 +1,144 @@
+-- =====================================================
+-- 📱 กุไอโฟน888 - ขโมยไข่ Hub (All-in-One for Delta)
+-- =====================================================
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local VirtualUser = game:GetService("VirtualUser")
+local StarterGui = game:GetService("StarterGui")
+
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- ลบ UI เก่าทิ้งหากมีการรันซ้ำ
+if PlayerGui:FindFirstChild("iPhone888_UI") then
+    PlayerGui.iPhone888_UI:Destroy()
+end
+
+-- 1. สร้างระบบ UI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "iPhone888_UI"
+ScreenGui.Parent = PlayerGui
+ScreenGui.ResetOnSpawn = false
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+MainFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
+MainFrame.Size = UDim2.new(0, 220, 0, 210)
+MainFrame.Active = true
+MainFrame.Draggable = true -- ลากย้ายตำแหน่งบนหน้าจอได้
+
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.BackgroundColor3 = Color3.fromRGB(220, 20, 60) -- สีปกแดงเด่น
+Title.Size = UDim2.new(1, 0, 0, 38)
+Title.Font = Enum.Font.SourceSansBold
+Title.Text = "📱 กุไอโฟน888"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 18
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Parent = MainFrame
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 6)
+
+-- ฟังก์ชันสร้างปุ่มสวิตช์ เปิด/ปิด
+local function createToggleButton(btnText, callback)
+    local btn = Instance.new("TextButton")
+    btn.Parent = MainFrame
+    btn.Size = UDim2.new(1, -10, 0, 42)
+    btn.Position = UDim2.new(0, 5, 0, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextSize = 15
+    btn.Text = btnText .. " : [ปิด]"
+
+    local state = false
+    btn.MouseButton1Click:Connect(function()
+        state = not state
+        if state then
+            btn.Text = btnText .. " : [เปิด]"
+            btn.BackgroundColor3 = Color3.fromRGB(0, 170, 80)
+        else
+            btn.Text = btnText .. " : [ปิด]"
+            btn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+        end
+        callback(state)
+    end)
+end
+
+-- 2. ฟังก์ชันขโมยไข่อัตโนมัติ (Auto Steal Eggs)
+_G.AutoStealEggs = false
+createToggleButton("🥚 ขโมยไข่ออโต้", function(enabled)
+    _G.AutoStealEggs = enabled
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.8)
+        if _G.AutoStealEggs then
+            pcall(function()
+                local char = LocalPlayer.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    -- ค้นหาไข่ในแมพขโมยไข่
+                    for _, obj in pairs(workspace:GetDescendants()) do
+                        if _G.AutoStealEggs and obj:IsA("Model") then
+                            local name = string.lower(obj.Name)
+                            if string.find(name, "egg") or string.find(name, "trex") or string.find(name, "rare") or string.find(name, "pet") then
+                                local targetPart = obj:FindFirstChild("PrimaryPart") or obj:FindFirstChildWhichIsA("BasePart")
+                                if targetPart then
+                                    hrp.CFrame = targetPart.CFrame + Vector3.new(0, 3, 0)
+                                    task.wait(0.5)
+                                    break
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+-- 3. ฟังก์ชันวิ่งเร็ว (Safe Speed)
+_G.SpeedHack = false
+createToggleButton("⚡ วิ่งเร็ว (Speed)", function(enabled)
+    _G.SpeedHack = enabled
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.3)
+        pcall(function()
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChild("Humanoid") then
+                if _G.SpeedHack then
+                    char.Humanoid.WalkSpeed = 35 -- ความเร็วปลอดภัย ไม่โดนเตะออก
+                else
+                    char.Humanoid.WalkSpeed = 16
+                end
+            end
+        end)
+    end
+end)
+
+-- 4. ระบบกันหลุดจากการ AFK (Anti-AFK)
+pcall(function()
+    LocalPlayer.Idled:Connect(function()
+        VirtualUser:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+        task.wait(1)
+        VirtualUser:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+    end)
+end)
+
+-- แจ้งเตือนเมื่อโหลดสำเร็จ
+StarterGui:SetCore("SendNotification", {
+    Title = "📱 กุไอโฟน888",
+    Text = "โหลดสคริปต์ขโมยไข่สำเร็จแล้ว!",
+    Duration = 4
+})
